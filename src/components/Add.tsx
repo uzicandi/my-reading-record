@@ -5,19 +5,26 @@ import { FormOutlined } from '@ant-design/icons';
 
 import Layout from './Layout';
 import styles from './Add.module.css';
+import BookService from '../services/BookService';
+import useToken from '../hooks/useToken';
 
 interface AddProps {
   loading: boolean;
   logout: () => void;
+  history: HistoryProps;
 }
 
+type HistoryProps = {
+  push: (path: string) => void;
+};
+
 // [project] 컨테이너에 작성된 함수를 컴포넌트에서 이용했다.
-const Add: React.FC<AddProps> = ({ loading, logout }) => {
+const Add: React.FC<AddProps> = ({ loading, logout, history }) => {
   const titleRef = React.useRef<Input>(null);
   const messageRef = React.useRef<TextArea>(null);
   const authorRef = React.useRef<Input>(null);
   const urlRef = React.useRef<Input>(null);
-
+  const token = useToken();
   return (
     <Layout>
       <PageHeader
@@ -83,7 +90,10 @@ const Add: React.FC<AddProps> = ({ loading, logout }) => {
           <Button
             size="large"
             loading={loading}
-            onClick={click}
+            onClick={() => {
+              if (token === null) return;
+              click(history, token as string);
+            }}
             className={styles.button}
           >
             Add
@@ -93,7 +103,7 @@ const Add: React.FC<AddProps> = ({ loading, logout }) => {
     </Layout>
   );
 
-  function click() {
+  function click(history: HistoryProps, token: string) {
     const title = titleRef.current!.state.value;
     const message = messageRef.current!.state.value;
     const author = authorRef.current!.state.value;
@@ -107,6 +117,9 @@ const Add: React.FC<AddProps> = ({ loading, logout }) => {
     ) {
       messageDialog.error('Please fill out all inputs');
       return;
+    } else {
+      BookService.addBook(token, { title, message, author, url });
+      history.push('/');
     }
   }
 };
