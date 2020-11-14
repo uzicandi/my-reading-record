@@ -44,7 +44,7 @@ const Books: React.FC<BooksProps> = ({ books, loading, goAdd, logout }) => {
         dataSource={books || []}
         columns={[
           {
-            title: 'Book',
+            title: 'books',
             dataIndex: 'book',
             key: 'book',
             render: (text, record) => (
