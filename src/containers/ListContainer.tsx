@@ -36,7 +36,15 @@ const ListContainer = ({
   // [project] 컨테이너에서 useDispatch, useSelector, useCallback 을 활용해서 중복없이 비동기 데이터를 보여주도록 처리했다.
 
   //return <List books={[]} loading={false} goAdd={goAdd} logout={logout} />;
-  return <List books={books} loading={false} goAdd={goAdd} logout={logout} />;
+  return (
+    <List
+      history={history}
+      books={books}
+      loading={false}
+      goAdd={goAdd}
+      logout={logout}
+    />
+  );
 };
 
 export default ListContainer;
