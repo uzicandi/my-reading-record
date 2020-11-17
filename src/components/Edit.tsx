@@ -6,21 +6,29 @@ import { FormOutlined } from '@ant-design/icons';
 import Layout from './Layout';
 import { BookResType } from '../types';
 import styles from './Edit.module.css';
+import BookService from '../services/BookService';
+import useToken from '../hooks/useToken';
 
 interface EditProps {
   book: BookResType | undefined | null;
   loading: boolean;
   logout: () => void;
+  history: HistoryProps;
 }
+
+type HistoryProps = {
+  push: (path: string) => void;
+};
 
 // [project] 컨테이너에 작성된 함수를 컴포넌트에서 이용했다.
 // [project] BookResType 의 응답 값을 이용하여, Edit 컴포넌트를 완성했다.
-const Edit: React.FC<EditProps> = ({ book, loading, logout }) => {
+const Edit: React.FC<EditProps> = ({ book, loading, logout, history }) => {
   const titleRef = useRef<Input>(null);
   const messageRef = useRef<TextArea>(null);
   const authorRef = useRef<Input>(null);
   const urlRef = useRef<Input>(null);
-
+  const token = useToken();
+  console.log('edit history', history);
   if (book === null) {
     return null;
   }
@@ -65,7 +73,7 @@ const Edit: React.FC<EditProps> = ({ book, loading, logout }) => {
           <Input
             placeholder="Title"
             ref={titleRef}
-            defaultValue={'{book.title}' || ''}
+            defaultValue={book.title || ''}
             className={styles.input}
           />
         </div>
@@ -78,7 +86,7 @@ const Edit: React.FC<EditProps> = ({ book, loading, logout }) => {
             rows={4}
             placeholder="Comment"
             ref={messageRef}
-            defaultValue={'{book.message}' || ''}
+            defaultValue={book.message || ''}
             className={styles.input}
             style={{ minHeight: 100 }}
           />
@@ -88,7 +96,7 @@ const Edit: React.FC<EditProps> = ({ book, loading, logout }) => {
           <Input
             placeholder="Author"
             ref={authorRef}
-            defaultValue={'{book.author}' || ''}
+            defaultValue={book.author || ''}
             className={styles.input}
           />
         </div>
@@ -97,7 +105,7 @@ const Edit: React.FC<EditProps> = ({ book, loading, logout }) => {
           <Input
             placeholder="URL"
             ref={urlRef}
-            defaultValue={'{book.url}' || ''}
+            defaultValue={book.url || ''}
             className={styles.input}
           />
         </div>
@@ -105,7 +113,11 @@ const Edit: React.FC<EditProps> = ({ book, loading, logout }) => {
           <Button
             size="large"
             loading={loading}
-            onClick={click}
+            onClick={() => {
+              if (token === null) return;
+              console.log('history', history); // 여기는 history가 왜 없을까
+              click(history, token as string, book.bookId);
+            }}
             className={styles.button}
           >
             Update
@@ -115,7 +127,7 @@ const Edit: React.FC<EditProps> = ({ book, loading, logout }) => {
     </Layout>
   );
 
-  function click() {
+  function click(history: HistoryProps, token: string, bookId: number) {
     const title = titleRef.current!.state.value;
     const message = messageRef.current!.state.value;
     const author = authorRef.current!.state.value;
@@ -129,6 +141,9 @@ const Edit: React.FC<EditProps> = ({ book, loading, logout }) => {
     ) {
       messageDialog.error('Please fill out all inputs');
       return;
+    } else {
+      BookService.editBook(token, bookId, { title, message, author, url });
+      history.push('/');
     }
   }
 };

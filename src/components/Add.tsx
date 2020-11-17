@@ -92,6 +92,7 @@ const Add: React.FC<AddProps> = ({ loading, logout, history }) => {
             loading={loading}
             onClick={() => {
               if (token === null) return;
+              console.log('add history', history);
               click(history, token as string);
             }}
             className={styles.button}
@@ -119,6 +120,7 @@ const Add: React.FC<AddProps> = ({ loading, logout, history }) => {
       return;
     } else {
       BookService.addBook(token, { title, message, author, url });
+      // newbook이 나오지 않음
       history.push('/');
     }
   }

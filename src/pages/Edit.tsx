@@ -4,15 +4,21 @@ import { Redirect, useParams } from 'react-router-dom';
 import useToken from '../hooks/useToken';
 import EditContainer from '../containers/EditContainer';
 
-const Edit = () => {
+type Props = {
+  history: {
+    push: (path: string) => void;
+  };
+};
+
+const Edit = (props: Props) => {
   const token = useToken();
-  let { id } = useParams();
-  const bookId = Number({ id });
-  console.log('typeof id', typeof bookId);
+  const { id } = useParams();
+  const idProps = Number(id);
+  console.log(idProps);
   if (token === null) {
     return <Redirect to="/signin" />;
   }
-  return <EditContainer bookId={bookId} />;
+  return <EditContainer id={idProps} history={props.history} />;
 };
 
 export default Edit;
