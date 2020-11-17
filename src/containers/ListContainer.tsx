@@ -7,7 +7,8 @@ import { push } from 'connected-react-router';
 import BookService from '../services/BookService';
 import useToken from '../hooks/useToken';
 import { BookResType } from '../types';
-import sagas from '../redux/modules/books';
+
+import { getBooks } from '../redux/modules/books';
 
 const ListContainer = ({
   history,
@@ -23,17 +24,23 @@ const ListContainer = ({
   }, [dispatch]);
   const token = useToken();
 
+  const getBookList = useCallback(() => {
+    return dispatch(getBooks());
+  }, [dispatch]);
+
+  //const books = getBookList().payload;
+
   const [books, setBooks] = useState<BookResType[]>([]);
-  let [booksProps, setBooksProps] = useState<BookResType[]>([]);
+  // let [booksProps, setBooksProps] = useState<BookResType[]>([]);
   useEffect(() => {
-    setBooks(sagas.getBooksSaga());
+    setBooks(getBookList().payload);
 
     // const setAsyncBooks = async () => {
     //   booksProps = await BookService.getBooks(token as string);
     //   setBooks(booksProps);
     // };
     // setAsyncBooks();
-  }, [booksProps]);
+  });
   console.log('books', books);
 
   // [project] saga 함수를 실행하는 액션 생성 함수를 실행하는 함수를 컨테이너에 작성했다.
