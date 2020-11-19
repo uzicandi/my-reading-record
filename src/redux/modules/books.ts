@@ -1,9 +1,7 @@
 import { BookResType } from '../../types';
 import BookService from '../../services/BookService';
-import { put, call, takeEvery } from 'redux-saga/effects';
+import { put, call, takeEvery, select } from 'redux-saga/effects';
 import { handleActions, createActions } from 'redux-actions';
-import TokenService from '../../services/TokenService';
-import { AnyAction } from 'redux';
 
 export interface BooksState {
   books: BookResType[] | null;
@@ -12,7 +10,7 @@ export interface BooksState {
 }
 
 const initialState: BooksState = {
-  books: [],
+  books: null,
   loading: false,
   error: null,
 };
@@ -23,25 +21,23 @@ const options = {
 
 
 // [project] redux-action 을 이용하여, books 모듈의 액션 생성 함수와 리듀서를 작성했다.
-const GET_BOOKS = 'GET_BOOKS';
 
-// export const { success, pending, fail } = createActions(
-//   {
-//     SUCCESS: (books: BookResType[]) => books
-//   }, 
-//   'PENDING',
-//   'FAIL',
-//   options);
+export const { success, pending, fail } = createActions(
+  {
+    SUCCESS: (books) => ({books})
+  }, 
+  'PENDING',
+  'FAIL',
+  options);
 
 const reducer = handleActions<BooksState, any>(
   {
-    PENDING: state => ({
+    PENDING: (state, action) => ({
       ...state,
       loading: true,
       error: null,
     }),
     SUCCESS: (state, action) => ({
-      ...state,
       books: action.payload.books,
       loading: false,
       error: null,
@@ -58,10 +54,9 @@ const reducer = handleActions<BooksState, any>(
 
 export default reducer;
 
-export const { getBooks } = createActions(
-  {
-    GET_BOOKS: (books: BookResType)  => ({books}),
-    },  options
+export const { getBooks } = createActions({},
+  'GET_BOOKS',
+  options
 )
 
 
@@ -71,17 +66,14 @@ export function* sagas() {
   yield takeEvery(`${options.prefix}/GET_BOOKS`, getBooksSaga);
 }
 
-interface bookSagaAction extends AnyAction {
-  payload: BookResType[];
-}
 
 // [project] 책 목록을 가져오는 saga 함수를 작성했다.
-function* getBooksSaga(action: bookSagaAction) {
+function* getBooksSaga() {
   try {
-    const token: string | null = TokenService.get();
-    if (!token) return;
+    yield put(pending());
+    const token: string = yield select((state)=> state.auth.token)
     const books: BookResType[] = yield call(BookService.getBooks, token);
-    yield put({ type: GET_BOOKS, books });
+    yield put(success(books));
   } catch (error) {
     yield put(fail(new Error(error?.response?.data?.error || 'UNKNOWN_ERROR')));
   }
