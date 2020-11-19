@@ -7,12 +7,8 @@ import { login as loginSaga } from '../redux/modules/auth';
 import { LoginReqType } from '../types';
 
 const SigninContainer: React.FC = () => {
-  const loading = useSelector<RootState, boolean>(
-    (state) => state.auth.loading,
-  );
-  const error = useSelector<RootState, Error | null>(
-    (state) => state.auth.error,
-  );
+  const loading = useSelector<RootState, boolean>(state => state.auth.loading);
+  const error = useSelector<RootState, Error | null>(state => state.auth.error);
   const dispatch = useDispatch();
 
   const login = useCallback(
@@ -21,7 +17,6 @@ const SigninContainer: React.FC = () => {
     },
     [dispatch],
   );
-
   return <Signin loading={loading} error={error} login={login} />;
 };
 
