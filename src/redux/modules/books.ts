@@ -1,7 +1,10 @@
-import { BookResType } from '../../types';
+import { BookResType, BookReqType } from '../../types';
 import BookService from '../../services/BookService';
 import { put, call, takeEvery, select } from 'redux-saga/effects';
 import { handleActions, createActions } from 'redux-actions';
+import { getTokenFromState, getBooksFromState } from '../utils';
+import { AnyAction } from 'redux';
+import { push } from 'connected-react-router';
 
 export interface BooksState {
   books: BookResType[] | null;
@@ -54,7 +57,10 @@ const reducer = handleActions<BooksState, any>(
 
 export default reducer;
 
-export const { getBooks } = createActions({},
+export const { getBooks, editBook } = createActions(
+  {
+    EDIT_BOOK: (bookId) => ({bookId})
+  },
   'GET_BOOKS',
   options
 )
@@ -64,6 +70,7 @@ export const { getBooks } = createActions({},
 // [project] saga 함수를 실행하는 액션과 액션 생성 함수를 작성했다.
 export function* sagas() {
   yield takeEvery(`${options.prefix}/GET_BOOKS`, getBooksSaga);
+  yield takeEvery(`${options.prefix}/EDIT_BOOK`, editBookSaga);
 }
 
 
@@ -81,6 +88,35 @@ function* getBooksSaga() {
 // [project] 책을 추가하는 saga 함수를 작성했다.
 // [project] 책을 삭제하는 saga 함수를 작성했다.
 // [project] 책을 수정하는 saga 함수를 작성했다.
+
+interface EditBookSagaAction extends AnyAction {
+  payload: {
+    bookId: number;
+    book: BookReqType;
+  }
+}
+
+function* editBookSaga(action: EditBookSagaAction) {
+  try {
+    yield put(pending());
+    const token: string = yield select(getTokenFromState);
+    const newBook = yield call(
+      BookService.editBook,
+      token,
+      action.payload.bookId,
+      action.payload.book,
+    );
+    const books: BookResType[] = yield select(getBooksFromState);
+    yield put(
+      success(
+        books.map((book) => (book.bookId === newBook.bookId ? newBook : book))
+      )
+    );
+    yield put(push('/'));
+  } catch (error) {
+    yield put(fail(new Error(error?.response?.data?.error || 'UNKNOWN_ERROR')));
+  }
+}
 
 
 
