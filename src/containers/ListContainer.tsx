@@ -28,6 +28,13 @@ const ListContainer: React.FC = props => {
     dispatch(push('/add'));
   }, [dispatch]);
 
+  const goEdit = useCallback(
+    (bookId: number) => {
+      dispatch(push(`/edit/${bookId}`));
+    },
+    [dispatch],
+  );
+
   const logout = useCallback(() => {
     dispatch(logoutSaga());
   }, [dispatch]);
@@ -40,6 +47,7 @@ const ListContainer: React.FC = props => {
       error={error}
       getBooks={getBooks}
       goAdd={goAdd}
+      goEdit={goEdit}
       logout={logout}
     />
   );

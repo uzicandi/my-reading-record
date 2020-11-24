@@ -12,6 +12,7 @@ interface BooksProps {
   loading: boolean;
   getBooks: () => void;
   goAdd: () => void;
+  goEdit: (bookId: number) => void;
   logout: () => void;
 }
 
@@ -19,10 +20,11 @@ interface BooksProps {
 // [project] BookResType 의 응답 값을 이용하여, List 컴포넌트의 키를 처리했다.
 const Books: React.FC<BooksProps> = ({
   books,
+  getBooks,
   loading,
   error,
-  getBooks,
   goAdd,
+  goEdit,
   logout,
 }) => {
   useEffect(() => {
@@ -67,7 +69,7 @@ const Books: React.FC<BooksProps> = ({
             dataIndex: 'book',
             key: 'book',
             render: (text, record) => (
-              <Book {...record} key={'{record.bookId}'} />
+              <Book {...record} goEdit={goEdit} key={record.bookId} />
             ),
           },
         ]}

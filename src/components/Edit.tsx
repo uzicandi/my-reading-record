@@ -1,34 +1,47 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { message as messageDialog, PageHeader, Input, Button } from 'antd';
 import TextArea from 'antd/lib/input/TextArea';
 import { FormOutlined } from '@ant-design/icons';
 
 import Layout from './Layout';
-import { BookResType } from '../types';
+import { BookResType, BookReqType } from '../types';
 import styles from './Edit.module.css';
-import BookService from '../services/BookService';
-import useToken from '../hooks/useToken';
 
 interface EditProps {
   book: BookResType | undefined | null;
   loading: boolean;
+  error: Error | null;
+  edit: (book: BookReqType) => void;
+  back: () => void;
+  getBooks: () => void;
   logout: () => void;
-  history: HistoryProps;
 }
-
-type HistoryProps = {
-  push: (path: string) => void;
-};
-
 // [project] 컨테이너에 작성된 함수를 컴포넌트에서 이용했다.
 // [project] BookResType 의 응답 값을 이용하여, Edit 컴포넌트를 완성했다.
-const Edit: React.FC<EditProps> = ({ book, loading, logout, history }) => {
+const Edit: React.FC<EditProps> = ({
+  book,
+  loading,
+  error,
+  edit,
+  getBooks,
+  back,
+  logout,
+}) => {
   const titleRef = useRef<Input>(null);
   const messageRef = useRef<TextArea>(null);
   const authorRef = useRef<Input>(null);
   const urlRef = useRef<Input>(null);
-  const token = useToken();
-  console.log('edit history', history);
+
+  useEffect(() => {
+    getBooks();
+  }, [getBooks]);
+
+  useEffect(() => {
+    if (error) {
+      logout();
+    }
+  }, [error, logout]);
+
   if (book === null) {
     return null;
   }
@@ -44,6 +57,7 @@ const Edit: React.FC<EditProps> = ({ book, loading, logout, history }) => {
   return (
     <Layout>
       <PageHeader
+        onBack={back}
         title={
           <div>
             <FormOutlined /> Edit Book
@@ -113,11 +127,7 @@ const Edit: React.FC<EditProps> = ({ book, loading, logout, history }) => {
           <Button
             size="large"
             loading={loading}
-            onClick={() => {
-              if (token === null) return;
-              console.log('history', history); // 여기는 history가 왜 없을까
-              click(history, token as string, book.bookId);
-            }}
+            onClick={click}
             className={styles.button}
           >
             Update
@@ -127,12 +137,11 @@ const Edit: React.FC<EditProps> = ({ book, loading, logout, history }) => {
     </Layout>
   );
 
-  function click(history: HistoryProps, token: string, bookId: number) {
+  function click() {
     const title = titleRef.current!.state.value;
     const message = messageRef.current!.state.value;
     const author = authorRef.current!.state.value;
     const url = urlRef.current!.state.value;
-
     if (
       title === undefined ||
       message === undefined ||
@@ -141,10 +150,13 @@ const Edit: React.FC<EditProps> = ({ book, loading, logout, history }) => {
     ) {
       messageDialog.error('Please fill out all inputs');
       return;
-    } else {
-      BookService.editBook(token, bookId, { title, message, author, url });
-      history.push('/');
     }
+    edit({
+      title,
+      message,
+      author,
+      url,
+    });
   }
 };
 export default Edit;
