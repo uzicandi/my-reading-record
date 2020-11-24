@@ -5,7 +5,6 @@ import { handleActions, createActions } from 'redux-actions';
 import { getTokenFromState, getBooksFromState } from '../utils';
 import { AnyAction } from 'redux';
 import { push } from 'connected-react-router';
-import Book from '../../components/Book';
 
 export interface BooksState {
   books: BookResType[] | null;
