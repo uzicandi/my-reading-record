@@ -6,7 +6,6 @@ import { FormOutlined } from '@ant-design/icons';
 import Layout from './Layout';
 import { BookResType, BookReqType } from '../types';
 import styles from './Edit.module.css';
-import useToken from '../hooks/useToken';
 
 interface EditProps {
   book: BookResType | undefined | null;
@@ -32,7 +31,6 @@ const Edit: React.FC<EditProps> = ({
   const messageRef = useRef<TextArea>(null);
   const authorRef = useRef<Input>(null);
   const urlRef = useRef<Input>(null);
-  const token = useToken();
 
   useEffect(() => {
     getBooks();
@@ -59,6 +57,7 @@ const Edit: React.FC<EditProps> = ({
   return (
     <Layout>
       <PageHeader
+        onBack={back}
         title={
           <div>
             <FormOutlined /> Edit Book
@@ -143,7 +142,6 @@ const Edit: React.FC<EditProps> = ({
     const message = messageRef.current!.state.value;
     const author = authorRef.current!.state.value;
     const url = urlRef.current!.state.value;
-
     if (
       title === undefined ||
       message === undefined ||

@@ -59,7 +59,7 @@ export default reducer;
 
 export const { getBooks, editBook } = createActions(
   {
-    EDIT_BOOK: (bookId) => ({bookId})
+    EDIT_BOOK: (bookId, book) => ({ bookId, book})
   },
   'GET_BOOKS',
   options

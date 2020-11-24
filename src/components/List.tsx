@@ -69,7 +69,7 @@ const Books: React.FC<BooksProps> = ({
             dataIndex: 'book',
             key: 'book',
             render: (text, record) => (
-              <Book {...record} goEdit={goEdit} key={'{record.bookId}'} />
+              <Book {...record} goEdit={goEdit} key={record.bookId} />
             ),
           },
         ]}
