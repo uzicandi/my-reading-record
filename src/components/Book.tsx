@@ -4,6 +4,7 @@ import { BookResType } from '../types';
 
 interface BookProps extends BookResType {
   goEdit: (bookId: number) => void;
+  deleteBook: (bookId: number) => void;
 }
 
 // [project] 컨테이너에 작성된 함수를 컴포넌트에서 이용했다.
@@ -15,6 +16,7 @@ const Book: React.FC<BookProps> = ({
   url,
   createdAt,
   goEdit,
+  deleteBook,
 }) => {
   return (
     <div className={styles.book}>
@@ -41,7 +43,7 @@ const Book: React.FC<BookProps> = ({
           edit
         </button>
 
-        <button>delete</button>
+        <button onClick={() => deleteBook(bookId)}>delete</button>
       </div>
     </div>
   );

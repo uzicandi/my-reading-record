@@ -6,7 +6,10 @@ import List from '../components/List';
 import { RootState } from '../redux/modules/rootReducer';
 import { BookResType } from '../types';
 import { logout as logoutSaga } from '../redux/modules/auth';
-import { getBooks as getBooksSaga } from '../redux/modules/books';
+import {
+  getBooks as getBooksSaga,
+  deleteBook as deleteBookSaga,
+} from '../redux/modules/books';
 
 const ListContainer: React.FC = props => {
   // [project] 컨테이너에서 useDispatch, useSelector, useCallback 을 활용해서 중복없이 비동기 데이터를 보여주도록 처리했다.
@@ -35,6 +38,13 @@ const ListContainer: React.FC = props => {
     [dispatch],
   );
 
+  const deleteBook = useCallback(
+    bookId => {
+      dispatch(deleteBookSaga(bookId));
+    },
+    [dispatch],
+  );
+
   const logout = useCallback(() => {
     dispatch(logoutSaga());
   }, [dispatch]);
@@ -48,6 +58,7 @@ const ListContainer: React.FC = props => {
       getBooks={getBooks}
       goAdd={goAdd}
       goEdit={goEdit}
+      deleteBook={deleteBook}
       logout={logout}
     />
   );
