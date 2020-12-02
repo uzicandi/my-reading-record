@@ -57,9 +57,11 @@ const reducer = handleActions<BooksState, any>(
 
 export default reducer;
 
-export const { getBooks, editBook } = createActions(
+export const { getBooks, addBook, editBook, deleteBook } = createActions(
   {
-    EDIT_BOOK: (bookId, book) => ({ bookId, book})
+    ADD_BOOK: (book) => ({book}),
+    EDIT_BOOK: (bookId, book) => ({ bookId, book}),
+    DELETE_BOOK: (bookId) => ({bookId})
   },
   'GET_BOOKS',
   options
@@ -70,7 +72,9 @@ export const { getBooks, editBook } = createActions(
 // [project] saga 함수를 실행하는 액션과 액션 생성 함수를 작성했다.
 export function* sagas() {
   yield takeEvery(`${options.prefix}/GET_BOOKS`, getBooksSaga);
+  yield takeEvery(`${options.prefix}/ADD_BOOK`, addBookSaga);
   yield takeEvery(`${options.prefix}/EDIT_BOOK`, editBookSaga);
+  yield takeEvery(`${options.prefix}/DELETE_BOOK`, deleteBookSaga);
 }
 
 
@@ -86,7 +90,53 @@ function* getBooksSaga() {
   }
 }
 // [project] 책을 추가하는 saga 함수를 작성했다.
+interface AddBookSagaAction extends AnyAction {
+  payload: {
+    book: BookReqType;
+  }
+}
+
+function* addBookSaga(action: AddBookSagaAction) {
+  try {
+    yield put(pending());
+    const token: string = yield select(getTokenFromState)
+    const book: BookResType = yield call(
+      BookService.addBook,
+      token,
+      action.payload.book
+    );
+    const books: BookResType[] = yield select(getBooksFromState);
+    yield put(success([...books, book]));
+    yield put(push('/'));
+  } catch (error) {
+    yield put(fail(new Error(error?.response?.data?.error || 'UNKNOWN_ERROR')));
+  }
+}
 // [project] 책을 삭제하는 saga 함수를 작성했다.
+
+interface DeleteBookSagaAction extends AnyAction {
+  payload: {
+    bookId: number;
+  }
+}
+
+function* deleteBookSaga(action: DeleteBookSagaAction) {
+  try {
+    const { bookId } = action.payload;
+    yield put(pending());
+    const token: string = yield select((state) => state.auth.token)
+    yield call(BookService.deleteBook, token, bookId)
+    const books: BookResType[] = yield select(getBooksFromState);
+    yield put(
+      success(
+        books.filter((book) => (book.bookId !== bookId))
+      )
+    );
+  } catch (error) {
+    yield put(fail(new Error(error?.response?.data?.error || 'UNKNOWN_ERROR')));
+  } 
+}
+
 // [project] 책을 수정하는 saga 함수를 작성했다.
 
 interface EditBookSagaAction extends AnyAction {

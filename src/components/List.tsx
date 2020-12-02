@@ -13,6 +13,7 @@ interface BooksProps {
   getBooks: () => void;
   goAdd: () => void;
   goEdit: (bookId: number) => void;
+  deleteBook: (bookId: number) => void;
   logout: () => void;
 }
 
@@ -25,6 +26,7 @@ const Books: React.FC<BooksProps> = ({
   error,
   goAdd,
   goEdit,
+  deleteBook,
   logout,
 }) => {
   useEffect(() => {
@@ -69,7 +71,12 @@ const Books: React.FC<BooksProps> = ({
             dataIndex: 'book',
             key: 'book',
             render: (text, record) => (
-              <Book {...record} goEdit={goEdit} key={record.bookId} />
+              <Book
+                {...record}
+                goEdit={goEdit}
+                deleteBook={deleteBook}
+                key={record.bookId}
+              />
             ),
           },
         ]}

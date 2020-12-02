@@ -1,33 +1,54 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { message as messageDialog, PageHeader, Input, Button } from 'antd';
 import TextArea from 'antd/lib/input/TextArea';
 import { FormOutlined } from '@ant-design/icons';
 
 import Layout from './Layout';
 import styles from './Add.module.css';
-import BookService from '../services/BookService';
-import useToken from '../hooks/useToken';
+import { BookResType, BookReqType } from '../types';
 
 interface AddProps {
+  books: BookResType[] | null;
+  error: Error | null;
   loading: boolean;
+  add: (book: BookReqType) => void;
+  back: () => void;
+  getBooks: () => void;
   logout: () => void;
-  history: HistoryProps;
 }
 
-type HistoryProps = {
-  push: (path: string) => void;
-};
-
 // [project] 컨테이너에 작성된 함수를 컴포넌트에서 이용했다.
-const Add: React.FC<AddProps> = ({ loading, logout, history }) => {
+const Add: React.FC<AddProps> = ({
+  books,
+  loading,
+  error,
+  back,
+  add,
+  getBooks,
+  logout,
+}) => {
   const titleRef = React.useRef<Input>(null);
   const messageRef = React.useRef<TextArea>(null);
   const authorRef = React.useRef<Input>(null);
   const urlRef = React.useRef<Input>(null);
-  const token = useToken();
+
+  useEffect(() => {
+    getBooks();
+  }, [getBooks]);
+
+  useEffect(() => {
+    if (error) {
+      logout();
+    }
+  }, [error, logout]);
+  if (books === null) {
+    return null;
+  }
+
   return (
     <Layout>
       <PageHeader
+        onBack={back}
         title={
           <div>
             <FormOutlined /> Add Book
@@ -90,11 +111,7 @@ const Add: React.FC<AddProps> = ({ loading, logout, history }) => {
           <Button
             size="large"
             loading={loading}
-            onClick={() => {
-              if (token === null) return;
-              console.log('add history', history);
-              click(history, token as string);
-            }}
+            onClick={click}
             className={styles.button}
           >
             Add
@@ -104,7 +121,7 @@ const Add: React.FC<AddProps> = ({ loading, logout, history }) => {
     </Layout>
   );
 
-  function click(history: HistoryProps, token: string) {
+  function click() {
     const title = titleRef.current!.state.value;
     const message = messageRef.current!.state.value;
     const author = authorRef.current!.state.value;
@@ -118,11 +135,8 @@ const Add: React.FC<AddProps> = ({ loading, logout, history }) => {
     ) {
       messageDialog.error('Please fill out all inputs');
       return;
-    } else {
-      BookService.addBook(token, { title, message, author, url });
-      // newbook이 나오지 않음
-      history.push('/');
     }
+    add({ title, message, author, url });
   }
 };
 export default Add;
